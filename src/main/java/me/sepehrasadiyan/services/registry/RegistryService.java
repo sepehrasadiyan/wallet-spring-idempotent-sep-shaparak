@@ -66,7 +66,7 @@ public class RegistryService {
     public Registry addRegistry(Registry registry) throws Exception {
         Optional<Registry> registryOptional = Optional.ofNullable(registryRepository.findByBID(registry.getBID()));
         if (registryOptional.isPresent()) {
-            throw new Exception("Registry found.");
+            throw new Exception("Registry Not found.");
         }
         return registryRepository.save(registry);
     }
@@ -78,7 +78,7 @@ public class RegistryService {
     public RegistryDto getActivities(String BID, Pageable pageable) throws Exception{
         Page<RegistryPreUpdate> registryPreUpdatePage = registryPreUpdateRepository.findByBID(BID, pageable);
         if(registryPreUpdatePage.getSize() == 0){
-            throw new ResourceNotFound("تراکنشی موجود نیست");
+            throw new ResourceNotFound("There is no Transaction.");
         }
         RegistryDto registryDto = new RegistryDto();
         List<RegistryPreUpdateDto> registryPreUpdateDtos = new ArrayList<>();

@@ -19,56 +19,56 @@ import java.util.UUID;
 @Table(name = "bill")
 public class Bill {
 
-    @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+  @Column(columnDefinition = "uuid_binary", name = "id", updatable = false, nullable = false)
+  private UUID id;
 
-    @NotNull(message = "billState should not be null.")
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "billState")
-    private BillState billState;
+  @NotNull(message = "billState should not be null.")
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "billState")
+  private BillState billState;
 
-    @NotNull(message = "Amount should not be null.")
-    private Long amount;
+  @NotNull(message = "Amount should not be null.")
+  private Long amount;
 
-    @NotNull(message = "AmountWithFee Should not be null.")
-    private Long amountWithFee;
+  @NotNull(message = "AmountWithFee Should not be null.")
+  private Long amountWithFee;
 
-    @NotNull(message = "fee should not be null.")
-    private Long fee;
+  @NotNull(message = "fee should not be null.")
+  private Long fee;
 
-    @NotBlank
-    @Column(updatable = false, nullable = false)
-    private String BID;
+  @NotBlank
+  @Column(updatable = false, nullable = false)
+  private String BID;
 
-    @Column(updatable = false, nullable = false)
-    private String username;
+  @Column(updatable = false, nullable = false)
+  private String username;
 
-    private String description;
+  private String description;
 
-    @NotNull
-    @Column(updatable = false, nullable = false)
-    private Timestamp createTime;
+  @NotNull
+  @Column(updatable = false, nullable = false)
+  private Timestamp createTime;
 
-    private Timestamp updateTime;
+  private Timestamp updateTime;
 
-    private Integer errorCode;
+  private Integer errorCode;
 
-    private String errorDescription;
+  private String errorDescription;
 
-    private Integer terminalId;
+  private Integer terminalId;
 
-    private String traceNo;
+  private String traceNo;
 
-    private String securePan;
+  private String securePan;
 
-    private String refNum;
+  private String refNum;
 
-    private Boolean rejectionSucceed;
+  private Boolean rejectionSucceed;
 
-    private Timestamp expTime;
+  private Timestamp expTime;
 
 
 }

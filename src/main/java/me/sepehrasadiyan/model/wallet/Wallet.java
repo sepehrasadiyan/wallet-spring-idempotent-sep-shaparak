@@ -20,7 +20,7 @@ public class Wallet {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(columnDefinition = "uuid_binary",name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(unique = true, updatable = false, nullable = false)

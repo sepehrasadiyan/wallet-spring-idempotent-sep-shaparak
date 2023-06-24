@@ -15,7 +15,7 @@ public class WalletListener {
 
     @PostPersist
     private void createNewWallet(){
-
+        //TODO:Log properly creating new wallet.
     }
 
 

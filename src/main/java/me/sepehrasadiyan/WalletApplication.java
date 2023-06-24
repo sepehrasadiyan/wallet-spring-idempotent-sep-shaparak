@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class WalletApplication {
 
 	public static void main(String[] args) {
-		System.setProperty("java.net.preferIPv4Stack", "true");
 		SpringApplication.run(WalletApplication.class, args);
 	}
 

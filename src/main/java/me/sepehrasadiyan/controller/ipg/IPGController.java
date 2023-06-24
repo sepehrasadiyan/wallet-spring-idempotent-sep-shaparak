@@ -1,7 +1,6 @@
 package me.sepehrasadiyan.controller.ipg;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import me.sepehrasadiyan.model.IPG.SepRedirectResponse;
 import me.sepehrasadiyan.model.wallet.bill.BillDto;
 import me.sepehrasadiyan.services.bill.BillService;
@@ -21,15 +20,11 @@ public class IPGController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IPGController.class);
 
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-
   @Autowired
   private IPGService ipgService;
 
   @Autowired
   private BillService billService;
-
-
 
 
   @PostMapping(value = "/transaction-response")

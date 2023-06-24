@@ -35,12 +35,6 @@ public class WalletController {
         return ResponseEntity.ok().body(modelMapper.map(wallet, WalletDto.class));
     }
 
-    @PostMapping(value = "/balance")
-    public ResponseEntity<?> balanceAccountWithInvoice(@RequestBody WalletMemDto walletMemDto,
-                                                    @RequestHeader(value = "Authorization") String authorization) throws Exception{
-        return (walletService.getAccountBalanceForInvoice(walletMemDto))? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
-
     @GetMapping(value = "/currentbalance")
     public ResponseEntity<?> getCurrentBalance(@RequestHeader(value = "Authorization") String authorization) throws Exception{
         return walletService.getCurrentBalance();

@@ -59,21 +59,5 @@ public class AppMainConfig {
         return new BillService();
     }
 
-/*    @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jacksonObjectMapperCustomization() {
-        return jacksonObjectMapperBuilder ->
-                jacksonObjectMapperBuilder.timeZone(TimeZone.getDefault());
-    }*/
-
-    /*    @Bean
-    public FilterRegistrationBean<AddRemovedCookie> addRemovedCookieFilterRegistrationBean(){
-        FilterRegistrationBean<AddRemovedCookie> registrationBean
-                = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new AddRemovedCookie(billServiceForAddCookie()));
-        registrationBean.addUrlPatterns("/api/bill/payment");
-        registrationBean.setOrder(200);
-        return registrationBean;
-    }*/
-
 
 }

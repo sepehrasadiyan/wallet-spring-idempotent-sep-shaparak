@@ -26,8 +26,6 @@ public class BillController {
 
     private static final int half_hour = (30 * 60);
 
-    private static String uuid_ges = null;
-
     @Autowired
     private BillService billService;
 
