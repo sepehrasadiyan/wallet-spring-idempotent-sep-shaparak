@@ -8,10 +8,10 @@
 		<version>2.6.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>ir.son</groupId>
+	<groupId>me.sepehrasadiyan</groupId>
 	<artifactId>tsp-wallet</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>tsp-wallet</name>
+	<version>85</version>
+	<name>wallet-idempotent</name>
 	<description>wallet project</description>
 	<properties>
 		<java.version>11</java.version>

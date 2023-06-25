@@ -13,6 +13,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class WalletApplication {
 
+	/**
+	 * @author Sepehr Asadiyan
+	 * @author SepehrAsadiyan
+	 * @version 85.0
+	 */
+
 	public static void main(String[] args) {
 		SpringApplication.run(WalletApplication.class, args);
 	}
