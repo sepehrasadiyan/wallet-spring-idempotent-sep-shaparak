@@ -8,6 +8,7 @@ For the IPG (Internet Payment Gateway), I use Pardakht Sepehr (SEP), which is an
 
 If anyone else encounters an error in the code, I would appreciate it if they could fix it accordingly.
 Thank you for clarifying your intention to address and correct any potential issues.
+Visit my [official website](https://sepehrasadiyan.me)
 ## Table of Contents
 
 - [Overview](#overview)
@@ -27,8 +28,11 @@ Implemented keyclock server that have REALM SEPEHR, and client Scope api-wallet.
 
 ## Usage
 1- Bill Creation: Users can create bills, specifying the amount to be charged and the associated details.
+
 2- IPG Payment: Users initiate payment using the integrated Internet Payment Gateway, securely completing the transaction.
+
 3- Wallet Deduction: Upon successful payment, the wallet balance is updated, deducting the payment amount.
+
 4- Transaction History(registry entity in application): Users can view their transaction history, including details of bills, payments, and wallet deductions.
 ## ENV Variable
 
@@ -42,6 +46,5 @@ Implemented keyclock server that have REALM SEPEHR, and client Scope api-wallet.
 |SEP_SHAPARAK_ADDRESS|
 |SEP_REVERSE_TRANSACTION|
 |SEP_REDIRECT_UR|
-
 
 
