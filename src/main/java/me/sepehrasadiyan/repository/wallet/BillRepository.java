@@ -3,6 +3,7 @@ package me.sepehrasadiyan.repository.wallet;
 import me.sepehrasadiyan.model.wallet.bill.Bill;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.LockModeType;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
@@ -29,13 +31,14 @@ public interface BillRepository extends JpaRepository<Bill, UUID> {
 
     @Query(value = "SELECT * FROM bill as b WHERE b.BID =:bid And b.username =:username And b.billState =:billState",
             nativeQuery = true)
+    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
     Bill findByBIDAndUsernameAndBillState(@Param("bid") String BID, @Param("username") String username,
                                           @Param("billState") int billStateCreate);
 
     @Modifying
     @Transactional(propagation = Propagation.MANDATORY)
     @Query(value = "DELETE FROM bill WHERE bill.createTime < :expiryDate And bill.billState =:billStateCreate ", nativeQuery = true)
-    public int deleteCreateTimeExpiry(@Param("expiryDate") Timestamp expiryDate, @Param("billStateCreate") int billStateCreate);
+    int deleteCreateTimeExpiry(@Param("expiryDate") Timestamp expiryDate, @Param("billStateCreate") int billStateCreate);
 
     @Modifying
     @Transactional(propagation = Propagation.MANDATORY)

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 import java.sql.Timestamp;
@@ -14,6 +15,7 @@ import java.util.TimeZone;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class WalletDto {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 

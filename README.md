@@ -2,12 +2,21 @@
 
 This project works with Spring Boot and PostgreSQL as the database. For security, Keycloak is utilized.
 
+***Just pay attention to TODOs in codes there is so many things you have to do it by your self as your business aspects***
+
+in this app multiple user can access to one wallet(wallet for group).
+
 I handle idempotency by injecting filters and preventing client execution until they declare the state of a bill.
 
 For the IPG (Internet Payment Gateway), I use Pardakht Sepehr (SEP), which is an Iranian IPG.
 
 If anyone else encounters an error in the code, I would appreciate it if they could fix it accordingly.
 Thank you for clarifying your intention to address and correct any potential issues.
+
+Just writing AOP as your wish.
+
+If this app Or any part of it helps you Give me a start :).
+
 Visit my [official website](https://sepehrasadiyan.me)
 ## Table of Contents
 

@@ -1,5 +1,6 @@
 package me.sepehrasadiyan.services.bill;
 
+import lombok.extern.slf4j.Slf4j;
 import me.sepehrasadiyan.model.IPG.SepRedirectResponse;
 import me.sepehrasadiyan.model.IPG.TransactionInfo;
 import me.sepehrasadiyan.model.wallet.bill.BillDto;
@@ -27,6 +28,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
+@Slf4j
 public class BillService {
 
   private static final int quart_hour_sec = (30 * 30);
@@ -77,7 +79,7 @@ public class BillService {
     bill.setBillState(BillState.CREATE);
     bill.setCreateTime(Timestamp.from(Instant.now(Clock.systemDefaultZone())));
     bill.setExpTime(Timestamp.from(Instant.now(Clock.systemDefaultZone()).plusSeconds(quart_hour_sec)));
-    long taxPlusAmount = (billCreate.getAmount() * 9) / 100;
+    double taxPlusAmount = (billCreate.getAmount() * 9) / 100;
     bill.setAmount(billCreate.getAmount());
     bill.setFee(taxPlusAmount);
     bill.setAmountWithFee(taxPlusAmount + billCreate.getAmount());
@@ -91,8 +93,8 @@ public class BillService {
   @Transactional(propagation = Propagation.REQUIRED)
   public boolean cancelBill(String BID, String username) throws Exception {
     long deletedItem = billRepository.deleteUserBillsActive(BID, username
-        , BillState.CREATE.getBillState()
-        , BillState.WAITING.getBillState());
+            , BillState.CREATE.getBillState()
+            , BillState.WAITING.getBillState());
     return deletedItem > 0L;
   }
 
@@ -109,7 +111,7 @@ public class BillService {
           case 2:
             TransactionInfo transactionInfo = null;
             if ((transactionInfo = ipgService.verifyTransaction(bill, sepRedirectResponse)) != null &&
-                !transactionInfo.isNeedReject()) {
+                    !transactionInfo.isNeedReject()) {
               bill.setBillState(BillState.SUCCESS);
               bill.setRefNum(transactionInfo.getRefNum());
               bill.setTerminalId(transactionInfo.getTerminalNumber());
@@ -161,6 +163,8 @@ public class BillService {
             bill.setErrorDescription(sepRedirectResponse.getState());
             return billRepository.save(bill);
         }
+        log.error("Unknown Exception Happen for BILL_ID:{}, BID:{} ,USER:{} , UTC_TIME{}.",
+                bill.getId(), bill.getBID(), bill.getUsername(), Timestamp.from(Instant.now(Clock.systemUTC())));
         throw new Exception("Unknown Exception.");
       }
     }
@@ -172,8 +176,8 @@ public class BillService {
 
   public boolean validateIncomingRequestForBillCreated(HttpServletRequest request) {
     List<Bill> bills = billRepository.findByBIDAndBillState(UserUtils.getProfile().getGroup(),
-        BillState.CREATE.getBillState(),
-        BillState.WAITING.getBillState());
+            BillState.CREATE.getBillState(),
+            BillState.WAITING.getBillState());
     if (bills.isEmpty()) {
       return true;
     }
@@ -214,8 +218,8 @@ public class BillService {
     return true;
   }
 
-  //TODO:For Check Every request in filters
-  public Cookie addCookieCreateStatus(HttpServletRequest request, HttpServletResponse response) {
+  //TODO:For Check Every request in filters. im not using it :).
+  public Cookie addCookieCreateStatus(HttpServletRequest request) {
     String eTag = null;
     if (request.getCookies() == null || request.getCookies().length < 1) {
       return getCookieFromDB();
@@ -229,12 +233,11 @@ public class BillService {
 
   private Cookie getCookieFromDB() {
     Bill bill = billRepository.findByBIDAndUsernameAndBillState(
-        UserUtils.getProfile().getGroup(),
-        UserUtils.getProfile().getUsername(),
-        BillState.CREATE.getBillState()
+            UserUtils.getProfile().getGroup(),
+            UserUtils.getProfile().getUsername(),
+            BillState.CREATE.getBillState()
     );
     if (bill == null) return null;
-    String eTag = bill.getId().toString();
     Cookie cookie = new Cookie("eTag", bill.getId().toString());
     cookie.setHttpOnly(true);
     cookie.setMaxAge(quart_hour_sec);

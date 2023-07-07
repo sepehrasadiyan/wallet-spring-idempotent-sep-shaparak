@@ -20,7 +20,7 @@ public class BillDto {
 
     private UUID id;
 
-    private Long amount;
+    private Double amount;
 
     private String description;
 

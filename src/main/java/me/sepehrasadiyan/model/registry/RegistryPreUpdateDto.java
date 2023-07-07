@@ -19,9 +19,9 @@ public class RegistryPreUpdateDto {
 
     private RegistryType type;
 
-    private Long lastBalance;
+    private Double lastBalance;
 
-    private Long updatedBalance;
+    private Double updatedBalance;
 
     private Timestamp modifyTime;
 

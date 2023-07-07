@@ -1,5 +1,6 @@
 package me.sepehrasadiyan.services.registry;
 
+import lombok.extern.slf4j.Slf4j;
 import me.sepehrasadiyan.exception.ResourceNotFound;
 import me.sepehrasadiyan.model.wallet.Wallet;
 import me.sepehrasadiyan.model.wallet.bill.Bill;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class RegistryService {
 
     @Autowired
@@ -34,7 +36,7 @@ public class RegistryService {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public RegistryPreUpdate updateWalletRegistry(Wallet walletEdited,
-                                                  Long amount,
+                                                  Double amount,
                                                   @Nullable UUID paymentInfoId,
                                                   @Nullable Bill bill) throws Exception {
         Registry registry = registryRepository.findByBID(walletEdited.getBID());
@@ -49,7 +51,7 @@ public class RegistryService {
         if (bill == null) {
             registryPreUpdate.setLastBalance(walletEdited.getCurrentBalance() + amount);
             registryPreUpdate.setType(RegistryType.WITHDRAW);
-            registryPreUpdate.setAmountChange(amount *= -1);
+            registryPreUpdate.setAmountChange(amount * -1);
             registryPreUpdate.setPaymentInfoId(paymentInfoId);
             return registryPreUpdateRepository.save(registryPreUpdate);
         } else {
@@ -72,6 +74,7 @@ public class RegistryService {
     }
 
     public RegistryPreUpdate getRegistryPreUpdate(UUID registryPreUpdate) throws Exception {
+        //TODO:Return better exception.
         return registryPreUpdateRepository.findById(registryPreUpdate).orElseThrow(Exception::new);
     }
 

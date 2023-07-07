@@ -1,14 +1,18 @@
 package me.sepehrasadiyan.services.wallet;
 
+
+import lombok.extern.slf4j.Slf4j;
 import me.sepehrasadiyan.repository.registry.RegistryRepository;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.PostPersist;
 
+@Slf4j
 public class WalletListener {
-    private static Logger LOGGER = LoggerFactory.getLogger(WalletListener.class);
+    //TODO: complete as your wish write the great logging system and recovery service.
+    //      for example after a success add money call try to logging correctly.
+    //      you can use AOP too :).
 
     @Autowired
     private RegistryRepository registryRepository;

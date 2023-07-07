@@ -13,6 +13,6 @@ public class BillCreate {
 
     @NotNull(message = "amount is null.")
     @Min(value = 10000, message = "min value should be 10000")
-    private Long amount;
+    private Double amount;
 
 }

@@ -60,14 +60,14 @@ public class BillController {
     @PostMapping(value = "/payment")
     public ResponseEntity<?> payBill(@CookieValue(name = "eTag") String eTag,
                                      @RequestHeader(value = "Authorization") String authorization
-            , @Valid @RequestBody(required = true) BillCreate billCreate) throws Exception {
-        // do login Payment and redirect link for script
+            , @Valid @RequestBody(required = false) BillCreate billCreate) throws Exception {
+        // do Payment and redirect link for script
         Bill billStatusCreate = this.billService.getBill(eTag);
         if (billStatusCreate.getBillState().getBillState() == 0) {
-            Wallet wallet = this.walletService.checkWalletBeforePayment(UserUtils.getProfile().getGroup(),
+            this.walletService.checkWalletBeforePayment(UserUtils.getProfile().getGroup(),
                     UserUtils.getProfile().getUsername());
             SepTokenResponse sepTokenResponse = ipgService.getTokenFromIPG(billStatusCreate);
-            Bill bill = billService.changeBillState(billStatusCreate, null);
+            billService.changeBillState(billStatusCreate, null);
             return ResponseEntity.ok().body(sepTokenResponse);
         }
         throw new Exception("Error in find right bill.");

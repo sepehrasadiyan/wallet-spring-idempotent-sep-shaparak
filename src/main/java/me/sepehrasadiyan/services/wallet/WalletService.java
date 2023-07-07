@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -58,38 +59,16 @@ public class WalletService {
   @Transactional(propagation = Propagation.REQUIRED)
   public Wallet checkWalletBeforePayment(String BID, String username) throws Exception {
     Wallet wallet = null;
-    RegistryPreUpdate registryPreUpdate = null;
     if ((wallet = walletRepository.findByBID(BID)) == null) {
-      wallet = new Wallet();
-      wallet.setLastAccessTime(Timestamp.from(Instant.now(Clock.systemDefaultZone())));
-      wallet.setLastUserAccess(username);
-      wallet.setBID(BID);
-      wallet.setCurrentBalance(0L);
-      wallet.setEnable(true);
-      Registry registry = new Registry();
-      registry.setRegistryPreUpdates(new ArrayList<>());
-      registry.setBID(wallet.getBID());
-      registryPreUpdate = new RegistryPreUpdate();
-      registryPreUpdate.setRegistry(registry);
-      registryPreUpdate.setUpdatedBalance(0L);
-      registryPreUpdate.setUsername(username);
-      registryPreUpdate.setAmount(0L);
-      registryPreUpdate.setLastBalance(0L);
-      registryPreUpdate.setAmountChange(0L);
-      registryPreUpdate.setBillId(null);
-      registryPreUpdate.setPaymentInfoId(null);
-      registryPreUpdate.setModifyTime(Timestamp.from(Instant.now(Clock.systemDefaultZone())));
-      registryPreUpdate.setBID(BID);
-      registryPreUpdate.setType(RegistryType.CREATE);
-      registry.getRegistryPreUpdates().add(registryPreUpdate);
-      Registry registrySaved = registryService.addRegistry(registry);
-      wallet.setLastRegistryPreUpdateID(registrySaved.getRegistryPreUpdates().get(0).getRegistryPreUpdateId());
+      wallet = createNewWallet( BID, username);
+      if (wallet == null) throw new RuntimeException("Some thing went wrong.");
       return walletRepository.save(wallet);
     }
-    registryPreUpdate = registryService.getRegistryPreUpdate(wallet.getLastRegistryPreUpdateID());
+    RegistryPreUpdate registryPreUpdate = registryService.getRegistryPreUpdate(wallet.getLastRegistryPreUpdateID());
     if (!wallet.isEnable() &&
-        !wallet.getLastRegistryPreUpdateID().toString().equals(registryPreUpdate.getRegistryPreUpdateId().toString())
-        && Objects.equals(registryPreUpdate.getUpdatedBalance(), wallet.getCurrentBalance())) {
+            !wallet.getLastRegistryPreUpdateID().toString().equals(registryPreUpdate.getRegistryPreUpdateId().toString())
+            && Objects.equals(registryPreUpdate.getUpdatedBalance(), wallet.getCurrentBalance())) {
+      makeWalletDisable(BID);
       throw new WalletDisableException("wallet is disable call admin.");
     }
     return wallet;
@@ -108,34 +87,41 @@ public class WalletService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED)
-  public Wallet addMoney(Long amount, String BID, String username, Bill bill) throws Exception {
-    Wallet wallet = walletRepository.findByBID(BID);
-    if (wallet == null || !wallet.isEnable()) throw new WalletDisableException("Wallet have error call admin.");
-    RegistryPreUpdate registryPreUpdateFix = registryService.getRegistryPreUpdate(wallet.getLastRegistryPreUpdateID());
-    if (wallet.getLastRegistryPreUpdateID().toString().equals(registryPreUpdateFix.getRegistryPreUpdateId().toString()) &&
-        Objects.equals(wallet.getCurrentBalance(), registryPreUpdateFix.getUpdatedBalance())) {
-      wallet.setCurrentBalance(wallet.getCurrentBalance() + amount);
-      wallet.setLastAccessTime(Timestamp.from(Instant.now(Clock.systemDefaultZone())));
-      wallet.setLastUserAccess(username);
-      RegistryPreUpdate registryPreUpdate = registryService.updateWalletRegistry(wallet, amount, null, bill);
-      wallet.setLastRegistryPreUpdateID(registryPreUpdate.getRegistryPreUpdateId());
-      walletRepository.save(wallet);
+  public Wallet addMoney(Double amount, String BID, String username, Bill bill) {
+    Wallet wallet = null;
+    try {
+      wallet = walletRepository.findByBID(BID);
+      if (wallet == null || !wallet.isEnable()) throw new WalletDisableException("Wallet have error call admin.");
+      RegistryPreUpdate registryPreUpdateFix = registryService.getRegistryPreUpdate(wallet.getLastRegistryPreUpdateID());
+      if (wallet.getLastRegistryPreUpdateID().toString().equals(registryPreUpdateFix.getRegistryPreUpdateId().toString()) &&
+              Objects.equals(wallet.getCurrentBalance(), registryPreUpdateFix.getUpdatedBalance())) {
+        RegistryPreUpdate registryPreUpdate = registryService.updateWalletRegistry(wallet, amount, null, bill);
+        walletRepository.updateAddMoneyWalletByBid(wallet.getId(), BID, wallet.getCurrentBalance() + amount,
+                Timestamp.from(Instant.now(Clock.systemUTC())), username, registryPreUpdate.getRegistryPreUpdateId());
+        return wallet;
+      }
       return wallet;
+    } catch (Exception e) {
+      //TODO: as i told before try not to return Exception its bad write you own Exception. i just write mose Used.
+      TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+      LOGGER.error("try to log properly and create good recovery methods.", e);
+      makeWalletDisable(BID);
+      return null;
     }
-    throw new Exception("Error in add money");
   }
 
+
   @Transactional(propagation = Propagation.REQUIRED)
-  public Wallet depositMoney(Long amount, String BID, UUID paymentInfoId, String username) throws Exception {
+  public Wallet depositMoney(Double amount, String BID, UUID paymentInfoId, String username) throws Exception {
     Wallet wallet = walletRepository.findByBID(BID);
     synchronized (wallet) {
       RegistryPreUpdate registryPreUpdateFix = registryService.getRegistryPreUpdate(wallet.getLastRegistryPreUpdateID());
       if (wallet.getLastRegistryPreUpdateID().toString().equals(registryPreUpdateFix.getRegistryPreUpdateId().toString()) &&
-          Objects.equals(wallet.getCurrentBalance(), registryPreUpdateFix.getUpdatedBalance())) {
+              Objects.equals(wallet.getCurrentBalance(), registryPreUpdateFix.getUpdatedBalance())) {
         throw new WalletDisableException("Error in wallet.");
       }
       if (wallet.isEnable()) {
-        long currentAmount = wallet.getCurrentBalance();
+        double currentAmount = wallet.getCurrentBalance();
         if ((currentAmount - amount) < feeAmount) {
           throw new WalletAmountNotEnoughException("Amount is not enough.");
         }
@@ -144,12 +130,56 @@ public class WalletService {
         wallet.setLastAccessTime(Timestamp.from(Instant.now(Clock.systemDefaultZone())));
         RegistryPreUpdate registryPreUpdate = registryService.updateWalletRegistry(wallet, amount, paymentInfoId, null);
         wallet.setLastRegistryPreUpdateID(registryPreUpdate.getRegistryPreUpdateId());
-        walletRepository.save(wallet);
+        Wallet walletEdited = walletRepository.save(wallet);
+        if(Objects.equals(walletEdited.getCurrentBalance(), wallet.getCurrentBalance()) &&
+            walletEdited.getLastRegistryPreUpdateID().equals(wallet.getLastRegistryPreUpdateID())){
+          TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+          makeWalletDisable(BID);
+        }
         return wallet;
       } else {
         throw new WalletDisableException("Wallet have error call admin.");
       }
     }
+  }
+
+  private Wallet createNewWallet( String BID, String username) {
+    try {
+      RegistryPreUpdate registryPreUpdate = new RegistryPreUpdate();
+      Wallet wallet = new Wallet();
+      wallet.setLastAccessTime(Timestamp.from(Instant.now(Clock.systemDefaultZone())));
+      wallet.setLastUserAccess(username);
+      wallet.setBID(BID);
+      wallet.setCurrentBalance(0.0);
+      wallet.setEnable(true);
+      Registry registry = new Registry();
+      registry.setRegistryPreUpdates(new ArrayList<>());
+      registry.setBID(wallet.getBID());
+      registryPreUpdate = new RegistryPreUpdate();
+      registryPreUpdate.setRegistry(registry);
+      registryPreUpdate.setUpdatedBalance(0.0);
+      registryPreUpdate.setUsername(username);
+      registryPreUpdate.setAmount(0.0);
+      registryPreUpdate.setLastBalance(0.0);
+      registryPreUpdate.setAmountChange(0.0);
+      registryPreUpdate.setBillId(null);
+      registryPreUpdate.setPaymentInfoId(null);
+      registryPreUpdate.setModifyTime(Timestamp.from(Instant.now(Clock.systemDefaultZone())));
+      registryPreUpdate.setBID(BID);
+      registryPreUpdate.setType(RegistryType.CREATE);
+      registry.getRegistryPreUpdates().add(registryPreUpdate);
+      Registry registrySaved = registryService.addRegistry(registry);
+      wallet.setLastRegistryPreUpdateID(registrySaved.getRegistryPreUpdates().get(0).getRegistryPreUpdateId());
+      return wallet;
+    }catch (Exception e){
+      //TODO: as i told try not to return Exception its bad write you own Exception. i just write mose Used.
+      LOGGER.error("Can not create new wallet for bid:{} and userName :{}", BID, username, e);
+      return null;
+    }
+  }
+
+  private void makeWalletDisable(String bid){
+    walletRepository.makeWalletDisable(bid);
   }
 
 }

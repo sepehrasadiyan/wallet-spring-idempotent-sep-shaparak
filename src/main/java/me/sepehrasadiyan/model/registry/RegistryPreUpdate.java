@@ -35,13 +35,13 @@ public class RegistryPreUpdate {
     private Timestamp modifyTime;
 
     @Column(nullable = false)
-    private Long updatedBalance;
+    private Double updatedBalance;
 
     @Column(nullable = false)
-    private Long lastBalance;
+    private Double lastBalance;
 
     @Column(nullable = false)
-    private Long amount;
+    private Double amount;
 
     @Column(updatable = false)
     private UUID billId;
@@ -51,7 +51,7 @@ public class RegistryPreUpdate {
     private RegistryType type;
 
     @Column(updatable = false)
-    private Long amountChange;
+    private Double amountChange;
 
     @Column(unique = true)
     private UUID paymentInfoId;

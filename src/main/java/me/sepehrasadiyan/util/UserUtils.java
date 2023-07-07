@@ -27,6 +27,7 @@ public class UserUtils {
     Map<String, Object> claims = token.getOtherClaims();
 
     try {
+      //TODO: use you own payloads.
       return new UserProfile(
               token.getPreferredUsername(),
               (List<String>) claims.get("group"),
